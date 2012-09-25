@@ -70,7 +70,6 @@ $(document).ready(function() {
     var padLayer = new Kinetic.Layer(),
         wordLayer = new Kinetic.Layer(),
         wordToGuess = getWord('fruits'),
-        wordLength = wordToGuess.length,
         abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
     for (var i in wordToGuess) {
@@ -95,10 +94,6 @@ $(document).ready(function() {
             fontFamily: 'Verdana',
             fontStyle: 'bold',
             textFill: 'black',
-            //scale: {
-            //    x: 0,
-            //    y: 0
-            //}
         });
 
         wordLayer.add(letter);
