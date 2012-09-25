@@ -9,13 +9,13 @@ function addCheckLetter(box, word, layer) {
     });
 }
 
-function showLetter(placeholder, letter) {
+function showLetter(placeholder, word, index) {
     placeholder.transitionTo({
         opacity: 0,
         duration: 0.3,
         easing: 'ease-out',
         callback: function () {
-            placeholder.setText(letter);
+            placeholder.setText(word[index]);
             placeholder.transitionTo({
                 opacity: 1,
                 duration: 0.3,
@@ -26,13 +26,17 @@ function showLetter(placeholder, letter) {
 }
 
 function checkLetter(box, word, layer) {
+    var wordWithoutAccents = removeAccents(word);
+
     for (var i in word) {
-        if (box.getText() == word[i]) {
+        if (box.getText() == wordWithoutAccents[i]) {
             box.setTextFill('blue');
-            var shapes = layer.get('.letter' + word[i])
+            var shapes = layer.get('.letter' + wordWithoutAccents[i])
 
             for (var j in shapes) {
-                showLetter(shapes[j], word[i]);
+                var shape = shapes[j];
+                var index = shape.getId()[0];
+                showLetter(shape, word, index);
             }
 
             return;
@@ -60,6 +64,30 @@ function getWord(category) {
     return words[parseInt(Math.random() * words.length)];
 }
 
+function removeAccents(word) {
+    var s = word;
+
+    var diacritics = [
+        /[\300-\306]/g, /[\340-\346]/g, // A, a
+        /[\310-\313]/g, /[\350-\353]/g, // E, e
+        /[\314-\317]/g, /[\354-\357]/g, // I, i
+        /[\322-\330]/g, /[\362-\370]/g, // O, o
+        /[\331-\334]/g, /[\371-\374]/g,  // U, u
+        /[\321]/g, /[\361]/g, // N, n
+        /[\307]/g, /[\347]/g, // C, c
+    ];
+
+    var chars = ['A','a','E','e','I','i','O','o',
+                 'U','u','N','n','C','c'];
+
+    for (var i = 0; i < diacritics.length; i++)
+    {
+        s = s.replace(diacritics[i], chars[i]);
+    }
+
+    return s;
+}
+
 $(document).ready(function() {
     var stage = new Kinetic.Stage({
         container: 'container',
@@ -74,7 +102,8 @@ $(document).ready(function() {
 
     for (var i in wordToGuess) {
         var letter = new Kinetic.Text({
-            name: 'letter' + wordToGuess[i],
+            id: i + 'letter' + wordToGuess[i],
+            name: 'letter' + removeAccents(wordToGuess)[i],
             x: 55 + 90 * i,
             y: stage.getHeight() / 4,
             stroke: '#555',
