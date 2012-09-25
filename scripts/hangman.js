@@ -6,8 +6,6 @@ function addCheckLetter(box, word, layer) {
             duration: 0.5,
             easing: 'ease-out',
         });
-
-        //alert('You clicked ' + box.getText());
     });
 }
 
@@ -47,6 +45,8 @@ function checkLetter(box, word, layer) {
 function getWord(category) {
     var words = null;
 
+    // This is needed in order to store
+    // $.getJSON() output in a variable.
     $.ajaxSetup({
         async: false
     });
