@@ -1,5 +1,5 @@
 function addCheckLetter(box, word, layer) {
-    box.on('mousedown', function() {
+    box.on('mousedown touchstart', function() {
         checkLetter(box, word, layer);
         box.transitionTo({
             opacity: 0.2,
