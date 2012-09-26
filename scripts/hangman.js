@@ -11,14 +11,16 @@ function addCheckLetter(box, word, layer) {
 
 function showLetter(placeholder, word, index) {
     placeholder.transitionTo({
-        opacity: 0,
-        duration: 0.3,
-        easing: 'ease-out',
+        scale: {
+            x: 0.01 // Firefox crashes the transition if scale.x is set to 0 (tested on 15.0.1)
+        },
+        duration: 0.5,
+        easing: 'ease-in',
         callback: function () {
             placeholder.setText(word[index]);
             placeholder.transitionTo({
-                opacity: 1,
-                duration: 0.3,
+                scale: { x: 1 },
+                duration: 0.5,
                 easing: 'ease-out'
             });
         }
