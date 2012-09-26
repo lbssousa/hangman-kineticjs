@@ -9,7 +9,7 @@ function addCheckLetter(box, word, layer) {
     });
 }
 
-function showLetter(placeholder, word, index) {
+function showLetter(placeholder) {
     placeholder.transitionTo({
         scale: {
             x: 0.01 // Firefox crashes the transition if scale.x is set to 0 (tested on 15.0.1)
@@ -17,9 +17,11 @@ function showLetter(placeholder, word, index) {
         duration: 0.5,
         easing: 'ease-in',
         callback: function () {
-            placeholder.setText(word[index]);
+            placeholder.setText(placeholder.getId()[0]);
             placeholder.transitionTo({
-                scale: { x: 1 },
+                scale: {
+                    x: 1
+                },
                 duration: 0.5,
                 easing: 'ease-out'
             });
@@ -27,18 +29,14 @@ function showLetter(placeholder, word, index) {
     });
 }
 
-function checkLetter(box, word, layer) {
-    var wordWithoutAccents = removeAccents(word);
-
-    for (var i in word) {
+function checkLetter(box, wordWithoutAccents, layer) {
+    for (var i in wordWithoutAccents) {
         if (box.getText() == wordWithoutAccents[i]) {
             box.setTextFill('blue');
             var shapes = layer.get('.letter' + wordWithoutAccents[i])
 
             for (var j in shapes) {
-                var shape = shapes[j];
-                var index = shape.getId()[0];
-                showLetter(shape, word, index);
+                showLetter(shapes[j]);
             }
 
             return;
@@ -100,12 +98,13 @@ $(document).ready(function() {
     var padLayer = new Kinetic.Layer(),
         wordLayer = new Kinetic.Layer(),
         wordToGuess = getWord('fruits'),
+        wordWithoutAccents = removeAccents(wordToGuess),
         abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
     for (var i in wordToGuess) {
         var letter = new Kinetic.Text({
-            id: i + 'letter' + wordToGuess[i],
-            name: 'letter' + removeAccents(wordToGuess)[i],
+            id: wordToGuess[i] + 'letter' + i,
+            name: 'letter' + wordWithoutAccents[i],
             x: 55 + 90 * i,
             y: stage.getHeight() / 4,
             stroke: '#555',
@@ -148,7 +147,7 @@ $(document).ready(function() {
             textFill: 'black'
         });
 
-        addCheckLetter(alphA, wordToGuess, wordLayer);
+        addCheckLetter(alphA, wordWithoutAccents, wordLayer);
         padLayer.add(alphA);
     }
 
