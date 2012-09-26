@@ -5,6 +5,9 @@ function addCheckLetter(box, word, layer) {
             opacity: 0.2,
             duration: 0.5,
             easing: 'ease-out',
+            callback: function () {
+                box.setListening(false);
+            }
         });
     });
 }
