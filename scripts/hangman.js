@@ -157,4 +157,8 @@ $(document).ready(function() {
     // add the layer to the stage
     stage.add(wordLayer);
     stage.add(padLayer);
+
+    document.getElementById('newgame').addEventListener('click', function() {
+        alert("Eu devereria reiniciar o jogo, mas ainda não sei como...");
+    }, false);
 });
