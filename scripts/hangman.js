@@ -12,25 +12,6 @@ function addCheckLetter(box, word, layer) {
     });
 }
 
-function resetPadLayer(padLayer, word, wordLayer) {
-    var pad = padLayer.getChildren();
-
-    for (i in pad) {
-        var box = pad[i];
-
-        if (box.getOpacity() < 1) {
-            box.setTextFill('black');
-            box.transitionTo({
-                opacity: 1,
-                duration: 0.5,
-                easing: 'ease-out'
-            });
-        }
-
-        addCheckLetter(box, word, wordLayer);
-    }
-}
-
 function showLetter(placeholder) {
     placeholder.transitionTo({
         scale: {
@@ -110,25 +91,13 @@ function removeAccents(word) {
     return s;
 }
 
-$(document).ready(function() {
-    var stage = new Kinetic.Stage({
-        container: 'container',
-        width: 800,
-        height: 600
-    });
-
-    var padLayer = new Kinetic.Layer(),
-        wordLayer = new Kinetic.Layer(),
-        wordToGuess = getWord('fruits'),
-        wordWithoutAccents = removeAccents(wordToGuess),
-        abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
-    for (var i in wordToGuess) {
+function initWordLayer(wordLayer, word, wordWithoutAccents, height) {
+    for (var i in word) {
         var letter = new Kinetic.Text({
-            id: wordToGuess[i] + 'letter' + i,
+            id: word[i] + 'letter' + i,
             name: 'letter' + wordWithoutAccents[i],
             x: 900,
-            y: stage.getHeight() / 4,
+            y: height / 4,
             stroke: '#555',
             strokeWidth: 5,
             fill: '#ddd',
@@ -151,15 +120,24 @@ $(document).ready(function() {
         wordLayer.add(letter);
         letter.transitionTo({
             x: 55 + 90 * i,
-            duration: 2,
+            duration: 1.5,
             easing: 'strong-ease-out'
         });
     }
+}
+
+function resetWordLayer(wordLayer, word, wordWithoutAccents, height) {
+    wordLayer.removeChildren();
+    initWordLayer(wordLayer, word, wordWithoutAccents, height);
+}
+
+function initPadLayer(padLayer, wordWithoutAccents, wordLayer, height) {
+    var abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     for (var i in abc) {
-        var alphA = new Kinetic.Text({
+        var letter = new Kinetic.Text({
             x: 15 + 60 * (i % 13),
-            y: stage.getHeight() - 160 + (i > 12 ? 80 : 0),
+            y: height - 160 + (i > 12 ? 80 : 0),
             stroke: '#555',
             strokeWidth: 5,
             fill: '#ddd',
@@ -174,16 +152,54 @@ $(document).ready(function() {
             textFill: 'black'
         });
 
-        addCheckLetter(alphA, wordWithoutAccents, wordLayer);
-        padLayer.add(alphA);
+        addCheckLetter(letter, wordWithoutAccents, wordLayer);
+        padLayer.add(letter);
     }
+}
+
+function resetPadLayer(padLayer, word, wordLayer) {
+    var pad = padLayer.getChildren();
+
+    for (i in pad) {
+        var box = pad[i];
+
+        if (box.getOpacity() < 1) {
+            box.setTextFill('black');
+            box.transitionTo({
+                opacity: 1,
+                duration: 0.5,
+                easing: 'ease-out'
+            });
+        }
+
+        addCheckLetter(box, word, wordLayer);
+    }
+}
+
+$(document).ready(function() {
+    var wordToGuess = getWord('fruits'),
+        wordWithoutAccents = removeAccents(wordToGuess);
+
+    var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 800,
+        height: 600
+    });
+
+    var padLayer = new Kinetic.Layer(),
+        wordLayer = new Kinetic.Layer();
+
+    initWordLayer(wordLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
+    initPadLayer(padLayer, wordWithoutAccents, wordLayer, stage.getHeight());
 
     // add the layer to the stage
     stage.add(wordLayer);
     stage.add(padLayer);
 
     document.getElementById('newgame').addEventListener('click', function() {
-        //alert("Eu devereria reiniciar o jogo, mas ainda não sei como...");
+        wordToGuess = getWord('fruits');
+        wordWithoutAccents = removeAccents(wordToGuess);
+        resetWordLayer(wordLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
         resetPadLayer(padLayer, wordWithoutAccents, wordLayer);
     }, false);
 });
