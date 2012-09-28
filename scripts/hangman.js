@@ -6,10 +6,29 @@ function addCheckLetter(box, word, layer) {
             duration: 0.5,
             easing: 'ease-out',
             callback: function () {
-                box.setListening(false);
+                box.off('mousedown touchstart');
             }
         });
     });
+}
+
+function resetPadLayer(padLayer, word, wordLayer) {
+    var pad = padLayer.getChildren();
+
+    for (i in pad) {
+        var box = pad[i];
+
+        if (box.getOpacity() < 1) {
+            box.setTextFill('black');
+            box.transitionTo({
+                opacity: 1,
+                duration: 0.5,
+                easing: 'ease-out'
+            });
+        }
+
+        addCheckLetter(box, word, wordLayer);
+    }
 }
 
 function showLetter(placeholder) {
@@ -159,6 +178,7 @@ $(document).ready(function() {
     stage.add(padLayer);
 
     document.getElementById('newgame').addEventListener('click', function() {
-        alert("Eu devereria reiniciar o jogo, mas ainda não sei como...");
+        //alert("Eu devereria reiniciar o jogo, mas ainda não sei como...");
+        resetPadLayer(padLayer, wordWithoutAccents, wordLayer);
     }, false);
 });
