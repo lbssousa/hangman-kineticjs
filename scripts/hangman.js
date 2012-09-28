@@ -1,15 +1,23 @@
-function addCheckLetter(box, word, layer) {
-    box.on('mousedown touchstart', function() {
-        checkLetter(box, word, layer);
-        box.transitionTo({
-            opacity: 0.2,
-            duration: 0.5,
-            easing: 'ease-out',
-            callback: function () {
+function addCheckLetter(wordLayer, padLayer, word) {
+    var pad = padLayer.getChildren();
+
+    for (var i in pad) {
+        var box = pad[i];
+
+        // transitionTo() works strangely inside a for loop.
+        // We need to encapsulate it inside a function.
+        (function(box) {
+            box.on('mousedown touchstart', function() {
+                checkLetter(box, word, wordLayer);
                 box.off('mousedown touchstart');
-            }
-        });
-    });
+                box.transitionTo({
+                    opacity: 0.2,
+                    duration: 0.5,
+                    easing: 'ease-out',
+                });
+            });
+        })(box);
+    }
 }
 
 function showLetter(placeholder) {
@@ -91,7 +99,7 @@ function removeAccents(word) {
     return s;
 }
 
-function initWordLayer(wordLayer, word, wordWithoutAccents, height) {
+function initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
     for (var i in word) {
         var letter = new Kinetic.Text({
             id: word[i] + 'letter' + i,
@@ -114,24 +122,39 @@ function initWordLayer(wordLayer, word, wordWithoutAccents, height) {
             fontSize: 40,
             fontFamily: 'Verdana',
             fontStyle: 'bold',
-            textFill: 'black',
+            textFill: 'black'
         });
 
         wordLayer.add(letter);
-        letter.transitionTo({
-            x: 55 + 90 * i,
-            duration: 1.5,
-            easing: 'strong-ease-out'
-        });
     }
+
+    initLetter(wordLayer.getChildren(), 0, function() {
+        addCheckLetter(wordLayer, padLayer, wordWithoutAccents);
+    }); 
 }
 
-function resetWordLayer(wordLayer, word, wordWithoutAccents, height) {
+function initLetter(letters, index, callback) {
+    letters[index].transitionTo({
+        x: 55 + 90 * index,
+        duration: 0.3,
+        easing: 'ease-out',
+        callback: function() {
+            if (index < letters.length - 1) {
+                initLetter(letters, index + 1, callback);
+            }
+            else {
+                callback();
+            }
+        }
+    });
+}
+
+function resetWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
     wordLayer.removeChildren();
-    initWordLayer(wordLayer, word, wordWithoutAccents, height);
+    initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height);
 }
 
-function initPadLayer(padLayer, wordWithoutAccents, wordLayer, height) {
+function initPadLayer(padLayer, height) {
     var abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     for (var i in abc) {
@@ -152,16 +175,16 @@ function initPadLayer(padLayer, wordWithoutAccents, wordLayer, height) {
             textFill: 'black'
         });
 
-        addCheckLetter(letter, wordWithoutAccents, wordLayer);
         padLayer.add(letter);
     }
 }
 
-function resetPadLayer(padLayer, word, wordLayer) {
+function resetPadLayer(padLayer) {
     var pad = padLayer.getChildren();
 
     for (i in pad) {
         var box = pad[i];
+        box.off('mousedown touchstart');
 
         if (box.getOpacity() < 1) {
             box.setTextFill('black');
@@ -171,8 +194,6 @@ function resetPadLayer(padLayer, word, wordLayer) {
                 easing: 'ease-out'
             });
         }
-
-        addCheckLetter(box, word, wordLayer);
     }
 }
 
@@ -189,17 +210,16 @@ $(document).ready(function() {
     var padLayer = new Kinetic.Layer(),
         wordLayer = new Kinetic.Layer();
 
-    initWordLayer(wordLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
-    initPadLayer(padLayer, wordWithoutAccents, wordLayer, stage.getHeight());
+    initPadLayer(padLayer, stage.getHeight());
+    initWordLayer(wordLayer, padLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
 
-    // add the layer to the stage
     stage.add(wordLayer);
     stage.add(padLayer);
 
     document.getElementById('newgame').addEventListener('click', function() {
         wordToGuess = getWord('fruits');
         wordWithoutAccents = removeAccents(wordToGuess);
-        resetWordLayer(wordLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
-        resetPadLayer(padLayer, wordWithoutAccents, wordLayer);
+        resetPadLayer(padLayer);
+        resetWordLayer(wordLayer, padLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
     }, false);
 });
