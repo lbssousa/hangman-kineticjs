@@ -127,7 +127,7 @@ $(document).ready(function() {
         var letter = new Kinetic.Text({
             id: wordToGuess[i] + 'letter' + i,
             name: 'letter' + wordWithoutAccents[i],
-            x: 55 + 90 * i,
+            x: 900,
             y: stage.getHeight() / 4,
             stroke: '#555',
             strokeWidth: 5,
@@ -149,6 +149,11 @@ $(document).ready(function() {
         });
 
         wordLayer.add(letter);
+        letter.transitionTo({
+            x: 55 + 90 * i,
+            duration: 2,
+            easing: 'strong-ease-out'
+        });
     }
 
     for (var i in abc) {
