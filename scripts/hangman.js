@@ -13,8 +13,9 @@ function addCheckLetter(wordLayer, padLayer, word) {
 
 function showLetter(placeholder) {
     placeholder.transitionTo({
+        // This may not work in Firefox if scale is set to 0.
         scale: {
-            x: 0.01 // Firefox crashes the transition if scale.x is set to 0 (tested on 15.0.1)
+            x: 0.01
         },
         duration: 0.5,
         easing: 'ease-in',
@@ -94,7 +95,7 @@ function initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
         var letter = new Kinetic.Text({
             id: word[i] + 'letter' + i,
             name: 'letter' + wordWithoutAccents[i],
-            x: 900,
+            x: 55 + 90 * i,
             y: height / 4,
             stroke: '#555',
             strokeWidth: 5,
@@ -112,22 +113,28 @@ function initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
             fontSize: 40,
             fontFamily: 'Verdana',
             fontStyle: 'bold',
-            textFill: 'black'
+            textFill: 'black',
+            scale: { x: 0.01, y: 0.01 },
+            opacity: 0
         });
 
         wordLayer.add(letter);
     }
 
-    initLetter(wordLayer.getChildren(), 0, function() {
+    initLetter(wordLayer.get('Shape'), 0, function() {
         addCheckLetter(wordLayer, padLayer, wordWithoutAccents);
     }); 
 }
 
 function initLetter(letters, index, callback) {
     letters[index].transitionTo({
-        x: 55 + 90 * index,
+        scale: {
+            x: 1,
+            y: 1
+        },
+        opacity: 1,
         duration: 0.3,
-        easing: 'ease-out',
+        easing: 'back-ease-out',
         callback: function() {
             if (index < letters.length - 1) {
                 initLetter(letters, index + 1, callback);
@@ -139,13 +146,39 @@ function initLetter(letters, index, callback) {
     });
 }
 
+function removeLetter(letter, timeout) { 
+    letter.transitionTo({
+        // This may not work in Firefox if scale is set to 0.
+        scale: {
+            x: 0.01,
+            y: 0.01
+        },
+        opacity: 0,
+        duration: timeout / 1000,
+        easing: 'ease-in',
+        callback: function() {
+            letter.remove();
+        }
+    });
+}
+
 function resetWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
     // This makes use of new Collection class, introduced in KineticJS 4.0.2
-    // The statement below is equivalent to
-    // wordLayer.get('Shape').each(function() { this.remove(); });
-    wordLayer.get('Shape').apply('remove');
+    // Just remembering, the following two statements are equivalent:
+    //// wordLayer.get('Shape').apply('remove');
+    //// wordLayer.get('Shape').each(function() { this.remove(); });
 
-    initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height);
+    // timeout in milliseconds
+    var timeout = 300;
+
+    wordLayer.get('Shape').each(function() {
+        removeLetter(this, timeout);
+    });
+
+    // transitionTo() method is asynchronous, so we need to set a timeout here.
+    setTimeout(function() {
+        initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height);
+    }, timeout + 150);
 }
 
 function initPadLayer(padLayer, height) {
