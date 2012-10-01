@@ -241,10 +241,10 @@ $(document).ready(function() {
     stage.add(wordLayer);
     stage.add(padLayer);
 
-    document.getElementById('newgame').addEventListener('click', function() {
+    $('#newgame').click(function() {
         wordToGuess = getWord('fruits');
         wordWithoutAccents = removeAccents(wordToGuess);
         resetPadLayer(padLayer);
         resetWordLayer(wordLayer, padLayer, wordToGuess, wordWithoutAccents, stage.getHeight());
-    }, false);
+    });
 });
