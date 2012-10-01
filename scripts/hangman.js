@@ -57,6 +57,8 @@ function getWord(category) {
 
     // WARNING: the following uses XMLHttpRequest,
     // and MAY NOT work from local file access!!
+    // Please enable local XMLHttpRequest support in your browser
+    // or install this script in a web server.
     $.getJSON('data/wordlist.json', function(data) {
         words = data[category];
     });
