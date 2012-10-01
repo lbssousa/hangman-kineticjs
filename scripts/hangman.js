@@ -1,23 +1,14 @@
 function addCheckLetter(wordLayer, padLayer, word) {
-    var pad = padLayer.getChildren();
-
-    for (var i in pad) {
-        var box = pad[i];
-
-        // transitionTo() works strangely inside a for loop.
-        // We need to encapsulate it inside a function.
-        (function(box) {
-            box.on('mousedown touchstart', function() {
-                checkLetter(box, word, wordLayer);
-                box.off('mousedown touchstart');
-                box.transitionTo({
-                    opacity: 0.2,
-                    duration: 0.5,
-                    easing: 'ease-out',
-                });
-            });
-        })(box);
-    }
+    // This makes use of new Collection class, introduced in KineticJS 4.0.2
+    padLayer.get('Shape').on('mousedown touchstart', function() {
+        checkLetter(this, word, wordLayer);
+        this.off('mousedown touchstart');
+        this.transitionTo({
+            opacity: 0.2,
+            duration: 0.5,
+            easing: 'ease-out'
+        });
+    });
 }
 
 function showLetter(placeholder) {
@@ -41,14 +32,13 @@ function showLetter(placeholder) {
 }
 
 function checkLetter(box, wordWithoutAccents, layer) {
-    for (var i in wordWithoutAccents) {
+    for (var i = 0; i < wordWithoutAccents.length; i++) {
         if (box.getText() == wordWithoutAccents[i]) {
             box.setTextFill('blue');
-            var shapes = layer.get('.letter' + wordWithoutAccents[i])
 
-            for (var j in shapes) {
-                showLetter(shapes[j]);
-            }
+            // This makes use of new Collection class,
+            // introduced in KineticJS 4.0.2
+            layer.get('.letter' + wordWithoutAccents[i]).each(function() { showLetter(this); });
 
             return;
         }
@@ -100,7 +90,7 @@ function removeAccents(word) {
 }
 
 function initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
-    for (var i in word) {
+    for (var i = 0; i < word.length; i++) {
         var letter = new Kinetic.Text({
             id: word[i] + 'letter' + i,
             name: 'letter' + wordWithoutAccents[i],
@@ -150,14 +140,18 @@ function initLetter(letters, index, callback) {
 }
 
 function resetWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
-    wordLayer.removeChildren();
+    // This makes use of new Collection class, introduced in KineticJS 4.0.2
+    // The statement below is equivalent to
+    // wordLayer.get('Shape').each(function() { this.remove(); });
+    wordLayer.get('Shape').apply('remove');
+
     initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height);
 }
 
 function initPadLayer(padLayer, height) {
     var abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-    for (var i in abc) {
+    for (var i = 0; i < abc.length; i++) {
         var letter = new Kinetic.Text({
             x: 15 + 60 * (i % 13),
             y: height - 160 + (i > 12 ? 80 : 0),
@@ -180,21 +174,19 @@ function initPadLayer(padLayer, height) {
 }
 
 function resetPadLayer(padLayer) {
-    var pad = padLayer.getChildren();
+    // This makes use of new Collection class, introduced in KineticJS 4.0.2
+    padLayer.get('Shape').each(function() {
+        this.off('mousedown touchstart');
 
-    for (i in pad) {
-        var box = pad[i];
-        box.off('mousedown touchstart');
-
-        if (box.getOpacity() < 1) {
-            box.setTextFill('black');
-            box.transitionTo({
+        if (this.getOpacity() < 1) {
+            this.setTextFill('black');
+            this.transitionTo({
                 opacity: 1,
                 duration: 0.5,
                 easing: 'ease-out'
             });
         }
-    }
+    });
 }
 
 $(document).ready(function() {
