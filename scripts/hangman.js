@@ -119,13 +119,13 @@ function initWordLayer(wordLayer, padLayer, word, wordWithoutAccents, height) {
         wordLayer.add(letter);
     }
 
-    initLetter(wordLayer.get('Shape'), 0, function() {
+    initLetter(wordLayer.get('Shape'), function() {
         addCheckLetter(wordLayer, padLayer, wordWithoutAccents);
     }); 
 }
 
-function initLetter(letters, index, callback) {
-    letters[index].transitionTo({
+function initLetter(letters, callback) {
+    letters.shift().transitionTo({
         scale: {
             x: 1,
             y: 1
@@ -134,11 +134,11 @@ function initLetter(letters, index, callback) {
         duration: 0.3,
         easing: 'back-ease-out',
         callback: function() {
-            if (index < letters.length - 1) {
-                initLetter(letters, index + 1, callback);
+            if (letters.length < 1) {
+                callback();
             }
             else {
-                callback();
+                initLetter(letters, callback);
             }
         }
     });
