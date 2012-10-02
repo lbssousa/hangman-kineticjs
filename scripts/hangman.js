@@ -42,24 +42,24 @@ function removeAccents(word) {
     return s;
 }
 
-function initLetter(letters, callback) {
+function initLetter(letters, duration, percentage, callback) {
     letters.shift().transitionTo({
         scale: {
             x: 1,
             y: 1
         },
         opacity: 1,
-        duration: 0.3,
-        easing: 'back-ease-out',
-        callback: function() {
-            if (letters.length < 1) {
-                callback();
-            }
-            else {
-                initLetter(letters, callback);
-            }
-        }
+        duration: duration / 1000,
+        easing: 'back-ease-out'
     });
+    setTimeout(function() {
+        if (letters.length < 1) {
+            callback();
+        }
+        else {
+            initLetter(letters, duration, percentage, callback);
+        }
+    }, duration * percentage / 100);
 }
 
 $(document).ready(function() {
@@ -185,7 +185,7 @@ $(document).ready(function() {
         }
 
         var thiz = this;
-        initLetter(this.get('Shape'), function() {
+        initLetter(this.get('Shape'), 500, 25, function() {
             thiz.addCheck(padLayer);
         }); 
     }
